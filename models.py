@@ -14,37 +14,35 @@ class Space(SQLModel, table=True):
     wifi_mbps: int
     capacity_total: int
     private_room: bool
-    noise: str
-    lat: Optional[float] = None
-    lng: Optional[float] = None
+    noise: Optional[str] = None
     is_active: bool = True
 
 class PlanType(SQLModel, table=True):
-    plan_type_id: int = Field(primary_key=True)
+    plan_type_id: Optional[int] = Field(default=None, primary_key=True)
     code: str
     name_ja: str
     unit_days: int
 
 class SpacePlan(SQLModel, table=True):
     space_plan_id: Optional[int] = Field(default=None, primary_key=True)
-    space_id: str = Field(foreign_key="space.space_id")
-    plan_type_id: int = Field(foreign_key="plantype.plan_type_id")
+    space_id: str
+    plan_type_id: int
     price_tax_included: int
-    refundable: bool = True
-    min_units: int = 1
-    max_units: int = 12
+    refundable: bool
+    min_units: int
+    max_units: int
 
 class Reservation(SQLModel, table=True):
     reservation_id: Optional[int] = Field(default=None, primary_key=True)
     user_name: str
     user_email: str
-    space_id: str = Field(foreign_key="space.space_id")
-    plan_type_id: int = Field(foreign_key="plantype.plan_type_id")
+    space_id: str
+    plan_type_id: int
     start_date: date
     units: int
     end_date: date
-    status: str = "confirmed"
     price_total: int
+    status: str
 
 class SearchParams(BaseModel):
     plan_code: str
@@ -52,7 +50,7 @@ class SearchParams(BaseModel):
     units: int
     max_price_total: Optional[int] = None
     min_wifi_mbps: Optional[int] = None
-    private_room_required: Optional[bool] = None
+    private_room_required: Optional[bool] = False
     distance_km: Optional[float] = None
     near_lat: Optional[float] = None
     near_lng: Optional[float] = None
