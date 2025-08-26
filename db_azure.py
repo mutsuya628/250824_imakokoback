@@ -20,19 +20,22 @@ DB_PORT = os.getenv('DB_PORT', '3306')
 DB_NAME = os.getenv('DB_NAME')
 SSL_CA_PATH = os.getenv('SSL_CA_PATH', 'DigiCertGlobalRootCA.crt.pem')
 
+# 修正 by M. Tanabe - MySQL文字エンコーディング設定追加
 # MySQLのURL構築
 DATABASE_URL = (
-    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
 )
 
 print("DB_HOST =", DB_HOST)
 
+# 修正 by M. Tanabe - 接続引数に文字エンコーディング設定追加
 engine = create_engine(
     DATABASE_URL,
     connect_args={
         "ssl": {
             "ca": SSL_CA_PATH
-        }
+        },
+        "charset": "utf8mb4"
     },
     echo=True,
     pool_pre_ping=True,

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from datetime import timedelta
 from dotenv import load_dotenv
+# 修正 by M. Tanabe - lifespanコンテキストマネージャー導入
+from contextlib import asynccontextmanager
 load_dotenv()
 import os
 print("USE_AZURE_DB =", os.getenv("USE_AZURE_DB"))
@@ -14,19 +16,24 @@ else:
 
 from models import Space, PlanType, SpacePlan, Reservation, SearchParams, ReservationCreate
 
-app = FastAPI(title="Shimanami Workspace API")
+# 修正 by M. Tanabe - 非推奨の@app.on_event("startup")をlifespanに変更
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 起動時の処理
+    init_db()
+    yield
+    # 終了時の処理（必要に応じて）
 
+app = FastAPI(title="Shimanami Workspace API", lifespan=lifespan)
+
+# 修正 by M. Tanabe - CORS設定にポート3001追加
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000","http://127.0.0.1:3000","http://localhost:3001","http://127.0.0.1:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
 
 @app.get("/api/plan-types")
 def get_plan_types(session: Session = Depends(get_session)):
